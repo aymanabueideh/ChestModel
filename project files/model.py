@@ -1,0 +1,56 @@
+from torch import nn
+import torch.nn.functional as fun
+
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, 3, padding=1)
+        # self.batch1=nn.BatchNorm2d(num_features=)
+        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, 3, padding=1)
+        self.conv4 = nn.Conv2d(128, 256, 3, padding=1)
+        self.conv5 = nn.Conv2d(256, 512, 3, padding=1)
+        self.conv6 = nn.Conv2d(512, 1024, 3, padding=1)
+        self.conv7 = nn.Conv2d(1024, 512, 3, padding=1)
+        self.conv8 = nn.Conv2d(512, 256, 3, padding=1)
+        #         self.conv9=nn.Conv2d(2048,4096,3,padding=1)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(256 * 30 * 30, 128)
+        self.fc2 = nn.Linear(128, 2)
+        self.dropout = nn.Dropout(0.25)
+        self.softmax = nn.LogSoftmax(dim=1)
+
+    def forward(self, x):
+        x = fun.relu(self.conv1(x))
+        #         print(x.size())
+        x = self.pool(fun.relu(self.conv2(x)))
+        #         print(x.size())
+        x = fun.relu(self.conv3(x))
+        #         print(x.size())
+        x = self.pool(fun.relu(self.conv4(x)))
+        #         print(x.size())
+        x = fun.relu(self.conv5(x))
+        #         print(x.size())
+        x = self.pool(fun.relu(self.conv6(x)))
+        #         print(x.size())
+        x = fun.relu(self.conv7(x))
+        #         print(x.size())
+        x = fun.relu(self.conv8(x))
+        #         print(x.size())
+        #         x= fun.relu(self.conv9(x))
+        #         print(x.size())
+        x = x.view(-1, 256 * 30 * 30)
+        #         print(x.size())
+        x = self.dropout(x)
+        #         print(x.size())
+        x = fun.relu(self.fc1(x))
+        #         print(x.size())
+        x = self.dropout(x)
+        #         print(x.size())
+        x = self.fc2(x)
+        x = self.softmax(x)
+        return x
+
+
+model = Net()
+print(model)
